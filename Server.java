@@ -8,15 +8,40 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.swing.*;
+
+import java.awt.BorderLayout;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 
-public class Server {
+public class Server extends JFrame{
+	public static Server server;
 	public static final int LISTEN_PORT = 6665;
+	public static JLabel l_disp;
+	public static JLabel l_number;
 	// list = all connected clients
 	ArrayList<Socket> list = new ArrayList<Socket>();
+	public Server()
+	{
+		l_disp = new JLabel("Listening Requests...");
+		l_number = new JLabel();
+		JPanel mainPanel = new JPanel();
+		mainPanel.setLayout(new BorderLayout());
+		JPanel topPanel = new JPanel();
+		JPanel topPanel2 = new JPanel();
+		topPanel2.setLayout(new BorderLayout());
+		topPanel2.add(l_disp,BorderLayout.NORTH);
+		topPanel2.add(l_number,BorderLayout.SOUTH);
+		topPanel.add(topPanel2);
+		mainPanel.add(topPanel, BorderLayout.NORTH);
+		this.getContentPane().add(mainPanel);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setSize(200,100);
+		this.setTitle("EZChat Server");
+		this.setVisible(true);
+	}
 	// Listening to Server Request
 	public void listenRequest()
 	{
@@ -59,7 +84,13 @@ public class Server {
 	// START HERE
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Server server = new Server();
+		try 
+	    { 
+	        UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+	    } 
+	    catch(Exception e){
+	    }
+		server = new Server();
 		server.listenRequest();
 	}
 	
@@ -97,6 +128,7 @@ public class Server {
 						System.out.println("SetName "+this.ip+" "+this.name);
 						output.writeUTF("Welcome, "+this.name);
 						broadcast(name+" has joined. "+list.size()+" online now.");
+						l_number.setText(list.size()+" online");
 					}
 					else if(iin[0].equals("\\clientDisconnect"))
 					{
@@ -130,11 +162,18 @@ public class Server {
 				list.remove(clientSocket);
 				System.out.println(name + " calls disconnect");
 				broadcast(name + " has disconnected. "+list.size()+" online now.");
+				l_number.setText(list.size()+" online");
 				//System.out.println("Client closed.");
 			}
 			catch(IOException e)
 			{
 				System.out.printf("Client %s [%s] has disconnected\n", name, clientSocket.getInetAddress().getHostAddress());
+				//input.close();
+				//output.close();
+				//clientSocket.close();
+				list.remove(clientSocket);
+				broadcast(name + " has disconnected. "+list.size()+" online now.");
+				l_number.setText(list.size()+" online");
 			}
 			/*
 			catch(EOFException e)

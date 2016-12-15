@@ -1,8 +1,14 @@
 package s103502014.internet_Project;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -58,6 +64,35 @@ public class Server extends JFrame{
 	}
 	public Server()
 	{
+		String availableAddress = "Available IPs for this machine: \n";
+		try {
+			Enumeration e = NetworkInterface.getNetworkInterfaces();
+			while(e.hasMoreElements())
+			{
+				NetworkInterface n = (NetworkInterface) e.nextElement();
+				Enumeration ee = n.getInetAddresses();
+				while(ee.hasMoreElements())
+				{
+					InetAddress i = (InetAddress) ee.nextElement();
+					if(!i.getHostAddress().contains(":"))availableAddress+=i.getHostAddress()+"\n";
+				}
+			}
+			//System.out.println(Inet4Address.getLocalHost().getHostAddress());
+		} catch (SocketException e1) {
+			// TODO Auto-generated catch block
+			//e1.printStackTrace();
+		}
+		//NetworkInterface ni = ;
+		/*
+		try {
+			
+			NetworkInterface.getInterfaceAddresses();
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+		//System.out.println(availableAddress);
 		t_names = new JTextArea();
 		t_names.setEditable(false);
 		t_display = new JTextArea();
@@ -81,6 +116,7 @@ public class Server extends JFrame{
 		DefaultCaret caret = (DefaultCaret)t_display.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
+		t_display.append(availableAddress+"\n");
 		
 		topPanel2.setLayout(new BorderLayout());
 		topPanel2.add(l_disp,BorderLayout.NORTH);

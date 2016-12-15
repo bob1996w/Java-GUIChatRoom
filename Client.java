@@ -100,14 +100,15 @@ public class Client extends JFrame{
 			{
 				name = m[1];
 				t_name.setText(name);
-				if(name.length()<22)l_name.setText(name+" > ");
-				else l_name.setText(name.substring(0,20)+"... >");
+				if(name.length()<=15)l_name.setText(name+" > ");
+				else l_name.setText(name.substring(0,14)+"... >");
 			}
 			else if(m[0].equals("\\setname"))
 			{
 				name = m[1];
 				t_name.setText(name);
-				l_name.setText(name+" >");
+				if(name.length()<=15)l_name.setText(name+" > ");
+				else l_name.setText(name.substring(0,14)+"... >");
 			}
 			a.sendMessage(message);
 		});
@@ -125,19 +126,22 @@ public class Client extends JFrame{
 			{
 				name = m[1];
 				t_name.setText(name);
-				l_name.setText(name+" >");
+				if(name.length()<=15)l_name.setText(name+" > ");
+				else l_name.setText(name.substring(0,14)+"... >");
 			}
 			else if(m[0].equals("\\setname"))
 			{
 				name = m[1];
 				t_name.setText(name);
-				l_name.setText(name+" >");
+				if(name.length()<=15)l_name.setText(name+" > ");
+				else l_name.setText(name.substring(0,14)+"... >");
 			}
 			a.sendMessage(message);
 		});
 		b_name.addActionListener(e -> {
 			name = t_name.getText();
-			l_name.setText(name+" >");
+			if(name.length()<=15)l_name.setText(name+" > ");
+			else l_name.setText(name.substring(0,14)+"... >");
 			a.sendMessage("\\setname "+name);
 		});
 		b_clear.addActionListener(e -> {
@@ -186,7 +190,8 @@ public class Client extends JFrame{
 			ip = t_ip.getText();
 			//t_name.setEditable(false);
 			t_ip.setEditable(false);
-			l_name.setText(name+" > ");
+			if(name.length()<=15)l_name.setText(name+" > ");
+			else l_name.setText(name.substring(0,14)+"... >");
 			b_send.setEnabled(true);
 			b_disconnect.setText("Disconnect");
 			b_name.setEnabled(true);

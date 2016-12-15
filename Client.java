@@ -1,17 +1,9 @@
 package s103502014.internet_Project;
 
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
-
-import javax.print.attribute.AttributeSet;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-
 import java.awt.*;
 
 import java.io.DataInputStream;
@@ -54,19 +46,19 @@ public class Client extends JFrame{
 		t_names = new JTextArea();
 		t_names.setEditable(false);
 		s_display = new JScrollPane(t_display);
-		s_display.setPreferredSize(new Dimension(400,490));
+		s_display.setPreferredSize(new Dimension(390,490));
 		s_names = new JScrollPane(t_names);
-		s_names.setPreferredSize(new Dimension(188,490));
-		t_ip.setPreferredSize(new Dimension(150,24));
-		t_name.setPreferredSize(new Dimension(150,24));
+		s_names.setPreferredSize(new Dimension(190,490));
+		t_ip.setPreferredSize(new Dimension(100,24));
+		t_name.setPreferredSize(new Dimension(100,24));
 		b_clear = new JButton("Clear");
 		mainPanel.setLayout(new BorderLayout());
 		JPanel p_control = new JPanel();
 		p_control.setLayout(new BorderLayout());
 		JPanel p_control2 = new JPanel();
-		JLabel l_ip = new JLabel("IP  ");
-		JLabel cl_name = new JLabel("  Name  ");
-		JPanel p_display = new JPanel();
+		JLabel l_ip = new JLabel("IP");
+		JLabel cl_name = new JLabel("Name");
+		//JPanel p_display = new JPanel();
 		JPanel p_input = new JPanel();
 		p_input.setLayout(new BorderLayout());
 		JPanel p_input2 = new JPanel();
@@ -82,7 +74,6 @@ public class Client extends JFrame{
 		DefaultCaret caret = (DefaultCaret)t_display.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		printmes("Set the ip and your name above, and click \"Connect\"");
-		
 		b_disconnect.addActionListener(e -> {
 			if(b_disconnect.getText().equals("Connect"))
 			{
@@ -92,18 +83,26 @@ public class Client extends JFrame{
 			else
 			{
 				statusChange(0);
+				//printmes("Connection Closed.");
 			}
 		});
 		b_send.addActionListener(e -> {
 			String message = t_input.getText();
 			t_input.setText("");
 			String[] m = message.split(" ",2);
-			if(message.equals("exit"))
+			if(message.equals("\\exit"))
 			{
 				a.sendMessage("\\clientDisconnect");
-				a.closeSocket();
+				statusChange(0);
+				//a.closeSocket();
 			}
-			else if(m[0].equals("\\setName"))
+			else if(m[0].equals("\\initialSetName"))
+			{
+				name = m[1];
+				t_name.setText(name);
+				l_name.setText(name+" >");
+			}
+			else if(m[0].equals("\\setname"))
 			{
 				name = m[1];
 				t_name.setText(name);
@@ -118,15 +117,16 @@ public class Client extends JFrame{
 			if(message.equals("exit"))
 			{
 				a.sendMessage("\\clientDisconnect");
-				a.closeSocket();
+				statusChange(0);
+				//a.closeSocket();
 			}
-			else if(m[0].equals("\\setName"))
+			else if(m[0].equals("\\initialSetName"))
 			{
 				name = m[1];
 				t_name.setText(name);
 				l_name.setText(name+" >");
 			}
-			else if(m[0].equals("\\changeName"))
+			else if(m[0].equals("\\setname"))
 			{
 				name = m[1];
 				t_name.setText(name);
@@ -164,8 +164,17 @@ public class Client extends JFrame{
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(600,600);
 		this.setTitle("EZChat");
+		this.setResizable(false);
+		
+		//System.out.print(p_center.getWidth()+" "+this.getWidth());
 		this.setVisible(true);
 		//connect.setVisible(true);
+		/*
+		p_center.setSize(new Dimension(this.getWidth(),480));
+		centerSplit.setSize(p_center.getSize());
+		this.setVisible(true);
+		this.repaint();
+		*/
 	}
 	public static void statusChange(int status)
 	{
@@ -183,6 +192,7 @@ public class Client extends JFrame{
 			a = new First(ip, name);
 			a.connect();
 			printmes("Starting connection...");
+			cli.setTitle("EZChat ["+ip+"]");
 		}
 		else
 		{
@@ -195,6 +205,7 @@ public class Client extends JFrame{
 			a.sendMessage("\\clientDisconnect");
 			a.closeSocket();
 			//printmes("Connection Closed.");
+			cli.setTitle("EZChat");
 		}
 	}
 	public void oldsendRoutine()
@@ -284,7 +295,7 @@ public class Client extends JFrame{
 				printmes("Connection Closed.");
 				statusChange(0);
 			}
-			sendMessage("\\setName " + name);
+			sendMessage("\\initialSetName " + name);
 		}
 		public void sendMessage(String mes)
 		{
@@ -304,7 +315,7 @@ public class Client extends JFrame{
 			public void run() {
 				try {
 					//System.out.println("Running");
-					printmes("Running");
+					//printmes("Running");
 					input = new DataInputStream(socket.getInputStream());
 					while(true)
 					{

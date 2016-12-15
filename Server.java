@@ -1,6 +1,5 @@
 package s103502014.internet_Project;
 
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 
 public class Server extends JFrame{
@@ -56,9 +54,9 @@ public class Server extends JFrame{
 		t_display = new JTextArea();
 		t_display.setEditable(false);
 		s_display = new JScrollPane(t_display);
-		s_display.setPreferredSize(new Dimension(400,515));
+		s_display.setPreferredSize(new Dimension(390,515));
 		s_names = new JScrollPane(t_names);
-		s_names.setPreferredSize(new Dimension(188,515));
+		s_names.setPreferredSize(new Dimension(190,515));
 		l_disp = new JLabel("Listening Requests...");
 		l_number = new JLabel("0 Online");
 		JPanel centerPanel = new JPanel();
@@ -90,6 +88,7 @@ public class Server extends JFrame{
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(600,600);
 		this.setTitle("EZChat Server");
+		this.setResizable(false);
 		this.setVisible(true);
 	}
 	// Listening to Server Request
@@ -113,7 +112,8 @@ public class Server extends JFrame{
 		}
 		catch(IOException e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
+			printmes("Error establishing connection");
 		}
 		finally
 		{
@@ -127,13 +127,17 @@ public class Server extends JFrame{
 				}
 				catch( IOException e)
 				{
-					e.printStackTrace();
+					//e.printStackTrace();
+					printmes("Error Closing Socket");
 				}
 			}
 		}
 	}
-	public static void updateNameList()
+	public void updateNameList()
 	{
+		if(userlist.size() != 0)
+			this.setTitle("EZChat Server: "+userlist.size()+" connected");
+		else this.setTitle("EZChat Server");
 		t_names.setText("");
 		for(Users u:userlist)
 		{
@@ -150,7 +154,8 @@ public class Server extends JFrame{
 				output.writeUTF("\\names \\end");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//e.printStackTrace();
+				printmes("Error sending messages");
 			}
 		}
 	}
@@ -177,7 +182,7 @@ public class Server extends JFrame{
 	{
 		String name="",ip="";
 		public Socket clientSocket;
-		private Scanner scanner;
+		//private Scanner scanner;
 		int index;
 		public RequestThread(Users c)
 		{
@@ -193,7 +198,7 @@ public class Server extends JFrame{
 			DataInputStream input = null;
 			DataOutputStream output = null;
 			String in;
-			String out;
+			//String out;
 			
 			try
 			{
@@ -204,7 +209,7 @@ public class Server extends JFrame{
 					in = input.readUTF();
 					String[] iin = in.split(" ", 2);
 					// System.out.println(in);
-					if(iin[0].equals("\\setName"))
+					if(iin[0].equals("\\initialSetName"))
 					{
 						this.name = iin[1];
 						//System.out.println("SetName "+this.ip+" "+this.name);
@@ -219,7 +224,7 @@ public class Server extends JFrame{
 					{
 						break;
 					}
-					else if(iin[0].equals("\\changeName"))
+					else if(iin[0].equals("\\setname"))
 					{
 						broadcast(this.name+" has changed name to "+iin[1]);
 						this.name = iin[1];
@@ -289,7 +294,8 @@ public class Server extends JFrame{
 					output.writeUTF("*Server < "+msg);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//e.printStackTrace();
+					printmes("Error sending messages");
 				}
 			}
 		}
@@ -304,7 +310,8 @@ public class Server extends JFrame{
 					output.writeUTF(name + " < " + msg);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//e.printStackTrace();
+					printmes("Error sending messages");
 				}
 			}
 		}
@@ -320,7 +327,8 @@ public class Server extends JFrame{
 					else output.writeUTF(name + " < " + msg);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//e.printStackTrace();
+					printmes("Error sending messages");
 				}
 			}
 		}

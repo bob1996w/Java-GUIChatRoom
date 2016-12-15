@@ -26,11 +26,13 @@ public class Client extends JFrame{
 	public static JLabel l_name;
 	//public static JTextPane t_display = new JTextPane();
 	public static JTextArea t_display;
+	public static JTextArea t_names;
 	public static JTextField t_input;
 	public static JTextField t_ip;
 	public static JTextField t_name;
 	public static JButton b_send;
 	public static JScrollPane s_display;// = new JScrollPane(t_display);
+	public static JScrollPane s_names;
 	public static JButton b_disconnect;
 	public static JButton b_clear;
 	public static JButton b_name;
@@ -47,8 +49,14 @@ public class Client extends JFrame{
 		b_name = new JButton("ChangeName");
 		b_name.setEnabled(false);
 		t_display = new JTextArea();
+		t_display.setEditable(false);
 		t_display.setEnabled(true);
+		t_names = new JTextArea();
+		t_names.setEditable(false);
 		s_display = new JScrollPane(t_display);
+		s_display.setPreferredSize(new Dimension(400,490));
+		s_names = new JScrollPane(t_names);
+		s_names.setPreferredSize(new Dimension(188,490));
 		t_ip.setPreferredSize(new Dimension(150,24));
 		t_name.setPreferredSize(new Dimension(150,24));
 		b_clear = new JButton("Clear");
@@ -63,9 +71,13 @@ public class Client extends JFrame{
 		p_input.setLayout(new BorderLayout());
 		JPanel p_input2 = new JPanel();
 		p_input2.setLayout(new BorderLayout());
+		JPanel p_center = new JPanel();
+		p_center.setLayout(new FlowLayout());
 		t_display.setEditable(false);
 		t_input.setEditable(false);
 		b_send.setEnabled(false);
+		JSplitPane centerSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, s_names, s_display);
+		centerSplit.setDividerLocation(0.25);
 		
 		DefaultCaret caret = (DefaultCaret)t_display.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
@@ -128,7 +140,7 @@ public class Client extends JFrame{
 			a.sendMessage("\\changeName "+name);
 		});
 		b_clear.addActionListener(e -> {
-			t_display.setText("");
+			t_display.setText("==========All Cleared==========");
 		});
 		p_control.add(b_disconnect,BorderLayout.WEST);
 		p_control2.add(l_ip);
@@ -142,10 +154,12 @@ public class Client extends JFrame{
 		p_input.add(p_input2, BorderLayout.WEST);
 		p_input.add(t_input, BorderLayout.CENTER);
 		p_input.add(b_send, BorderLayout.EAST);
+		p_center.add(centerSplit);
 		
 		mainPanel.add(p_control,BorderLayout.NORTH);
 		mainPanel.add(p_input, BorderLayout. SOUTH);
-		mainPanel.add(s_display,BorderLayout.CENTER);
+		mainPanel.add(p_center, BorderLayout.CENTER);
+		//mainPanel.add(s_display,BorderLayout.CENTER);
 		this.getContentPane().add(mainPanel);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(600,600);
@@ -180,7 +194,7 @@ public class Client extends JFrame{
 			b_name.setEnabled(false);
 			a.sendMessage("\\clientDisconnect");
 			a.closeSocket();
-			printmes("Connection Closed.");
+			//printmes("Connection Closed.");
 		}
 	}
 	public void oldsendRoutine()
@@ -228,7 +242,7 @@ public class Client extends JFrame{
 	}
 	public static void printmes(String mes)
 	{
-		t_display.append("\n" + mes);
+		t_display.append(mes+"\n");
 		//appendToPane(t_display,"\n" + mes, Color.RED);
 	}
 	public static void main(String[] args) {
@@ -262,10 +276,12 @@ public class Client extends JFrame{
 			} catch (UnknownHostException e) {
 				//System.out.println("System < Unknown Server");
 				printmes("Error: Unknown Server");
+				printmes("Connection Closed.");
 				statusChange(0);
 			} catch (IOException e) {
 				//System.out.println("System < Fuck You");
 				printmes("Error: Server not found");
+				printmes("Connection Closed.");
 				statusChange(0);
 			}
 			sendMessage("\\setName " + name);
@@ -287,14 +303,25 @@ public class Client extends JFrame{
 			@Override
 			public void run() {
 				try {
-					System.out.println("Running");
+					//System.out.println("Running");
+					printmes("Running");
 					input = new DataInputStream(socket.getInputStream());
 					while(true)
 					{
 						in = input.readUTF();
+						String[] iin = in.split(" ",2);
 						if(in.trim().equals("\\fuck"))
 						{
 							//sendcheck = true;
+						}
+						else if(iin[0].equals("\\names"))
+						{
+							if(iin[1].equals("\\start"))
+								t_names.setText("");
+							else if(iin[1].equals("\\end"))
+							{}
+							else
+								t_names.append(iin[1]+"\n");
 						}
 						else
 						{
@@ -304,8 +331,8 @@ public class Client extends JFrame{
 					}
 				} catch (IOException e) {
 					//printmes("System < 總之就是出問題了你這混帳");
-					//printmes("Socket disconnected.");
-					//statusChange(0);
+					printmes("Socket disconnected.");
+					statusChange(0);
 				}
 				
 			}
@@ -315,7 +342,7 @@ public class Client extends JFrame{
 			try {
 				socket.close();
 			} catch (IOException e) {
-				printmes("System < Closing error");
+				printmes("Socket closing error");
 			}
 		}
 	}

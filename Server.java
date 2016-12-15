@@ -32,6 +32,7 @@ public class Server extends JFrame{
 	public static JScrollPane s_display;
 	public static JScrollPane s_names;
 	public static JTextArea t_names;
+	public static int currentID = 1;
 	// list = all connected clients
 	//ArrayList<Socket> list = new ArrayList<Socket>();
 	//static ArrayList<String> names = new ArrayList<String>();
@@ -40,9 +41,11 @@ public class Server extends JFrame{
 	{
 		public Socket client;
 		public String name;
-		public Users(Socket socket)
+		public int clientID;
+		public Users(Socket socket, int currentID)
 		{
 			this.client = socket;
+			this.clientID = currentID;
 		}
 		public void setName(String name)
 		{
@@ -61,6 +64,17 @@ public class Server extends JFrame{
 				e.printStackTrace();
 			}
 		}
+	}
+	public static int convertIndex(int clientID)
+	{
+		for(Users u:userlist)
+		{
+			if( u.clientID == clientID)
+			{
+				return userlist.indexOf(u);
+			}
+		}
+		return 0;
 	}
 	public Server()
 	{
@@ -149,7 +163,8 @@ public class Server extends JFrame{
 			while (true)
 			{
 				Socket socket = serverSocket.accept();
-				Users client = new Users(socket);
+				Users client = new Users(socket, currentID);
+				currentID++;
 				userlist.add(client);
 				threadExecutor.execute( new RequestThread(client));
 				//Thread thread = new Thread(new RequestThread())
@@ -229,12 +244,14 @@ public class Server extends JFrame{
 	{
 		String name="",ip="";
 		public Socket clientSocket;
+		public Users cli;
 		//private Scanner scanner;
-		int index;
+		int id;
 		public RequestThread(Users c)
 		{
+			this.cli = c;
 			this.clientSocket = c.client;
-			index = userlist.indexOf(c);
+			id = c.clientID;
 		}
 		@Override
 		public void run() {
@@ -253,6 +270,7 @@ public class Server extends JFrame{
 				output = new DataOutputStream( this.clientSocket.getOutputStream() );
 				while( true )
 				{
+					//index = userlist.indexOf(cli);
 					in = input.readUTF();
 					String[] iin = in.split(" ", 2);
 					// System.out.println(in);
@@ -262,7 +280,7 @@ public class Server extends JFrame{
 						//System.out.println("SetName "+this.ip+" "+this.name);
 						printmes(this.name+" ["+this.ip+"] has connected.");
 						output.writeUTF("Welcome, "+this.name);
-						userlist.get(index).setName(this.name);
+						userlist.get(convertIndex(id)).setName(this.name);
 						broadcast(name+" has joined. "+userlist.size()+" online now.");
 						l_number.setText(userlist.size()+" Online");
 						updateNameList();
@@ -275,7 +293,7 @@ public class Server extends JFrame{
 					{
 						broadcast(this.name+" has changed name to "+iin[1]);
 						this.name = iin[1];
-						userlist.get(index).setName(this.name);
+						userlist.get(convertIndex(id)).setName(this.name);
 						//System.out.println("ChangeName"+this.ip+" "+this.name);
 						printmes("ChangeName "+this.ip+" "+this.name);
 						updateNameList();
@@ -301,7 +319,7 @@ public class Server extends JFrame{
 				output.close();
 				clientSocket.close();
 				//list.remove(clientSocket);
-				userlist.remove(index);
+				userlist.remove(convertIndex(id));
 				//System.out.println(name + " calls disconnect");
 				printmes(name + " calls disconnect");
 				broadcast(name + " has disconnected. "+userlist.size()+" online now.");
@@ -312,12 +330,12 @@ public class Server extends JFrame{
 			catch(IOException e)
 			{
 				//System.out.printf("Client %s [%s] has disconnected\n", name, clientSocket.getInetAddress().getHostAddress());
-				printmes("Client "+name+" ["+clientSocket.getInetAddress().getHostAddress()+" has disconnected");
+				printmes("Client "+name+" ["+clientSocket.getInetAddress().getHostAddress()+"] has disconnected");
 				//input.close();
 				//output.close();
 				//clientSocket.close();
 				//list.remove(clientSocket);
-				userlist.remove(index);
+				userlist.remove(convertIndex(id));
 				broadcast(name + " has disconnected. "+userlist.size()+" online now.");
 				l_number.setText(userlist.size()+" online");
 				try {

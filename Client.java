@@ -100,7 +100,8 @@ public class Client extends JFrame{
 			{
 				name = m[1];
 				t_name.setText(name);
-				l_name.setText(name+" >");
+				if(name.length()<22)l_name.setText(name+" > ");
+				else l_name.setText(name.substring(0,20)+"... >");
 			}
 			else if(m[0].equals("\\setname"))
 			{
@@ -137,10 +138,10 @@ public class Client extends JFrame{
 		b_name.addActionListener(e -> {
 			name = t_name.getText();
 			l_name.setText(name+" >");
-			a.sendMessage("\\changeName "+name);
+			a.sendMessage("\\setname "+name);
 		});
 		b_clear.addActionListener(e -> {
-			t_display.setText("==========All Cleared==========");
+			t_display.setText("==========All Cleared==========\n");
 		});
 		p_control.add(b_disconnect,BorderLayout.WEST);
 		p_control2.add(l_ip);

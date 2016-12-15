@@ -46,6 +46,15 @@ public class Server extends JFrame{
 		{
 			return this.name;
 		}
+		public void closeSocket()
+		{
+			try {
+				client.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	public Server()
 	{
@@ -133,7 +142,7 @@ public class Server extends JFrame{
 			}
 		}
 	}
-	public void updateNameList()
+	public void updateNameList() throws IOException
 	{
 		if(userlist.size() != 0)
 			this.setTitle("EZChat Server: "+userlist.size()+" connected");
@@ -156,6 +165,8 @@ public class Server extends JFrame{
 				// TODO Auto-generated catch block
 				//e.printStackTrace();
 				printmes("Error sending messages");
+				u.closeSocket();
+				userlist.remove(u);
 			}
 		}
 	}
@@ -273,7 +284,12 @@ public class Server extends JFrame{
 				userlist.remove(index);
 				broadcast(name + " has disconnected. "+userlist.size()+" online now.");
 				l_number.setText(userlist.size()+" online");
-				updateNameList();
+				try {
+					updateNameList();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					//e1.printStackTrace();
+				}
 			}
 			/*
 			catch(EOFException e)
@@ -296,6 +312,8 @@ public class Server extends JFrame{
 					// TODO Auto-generated catch block
 					//e.printStackTrace();
 					printmes("Error sending messages");
+					u.closeSocket();
+					userlist.remove(u);
 				}
 			}
 		}
@@ -312,6 +330,8 @@ public class Server extends JFrame{
 					// TODO Auto-generated catch block
 					//e.printStackTrace();
 					printmes("Error sending messages");
+					u.closeSocket();
+					userlist.remove(u);
 				}
 			}
 		}
@@ -329,6 +349,8 @@ public class Server extends JFrame{
 					// TODO Auto-generated catch block
 					//e.printStackTrace();
 					printmes("Error sending messages");
+					u.closeSocket();
+					userlist.remove(u);
 				}
 			}
 		}
